@@ -9,7 +9,7 @@ OUT CTRLP
 MVI A,00H
 
 CHECKKYP: 
-	IN PORTC
+	IN PORTC ;Make sure keypad are in portc 
 	ANI 10H
 	JZ CHECKKYP
 	IN PORTC
@@ -23,7 +23,7 @@ CHECKKYP:
 LOOK: 
 	LXI H,TABLE
 	MOV L,A
-	MOV A,M
+	MOV A,M ;Make sure 7-segment display are in portb
 	RET
 
 	org 2000H
