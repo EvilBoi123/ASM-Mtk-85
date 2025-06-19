@@ -15,41 +15,41 @@ CHECKKYP:
 	ANI 10H
 	JZ NEXT1
 	MVI B, 06H
-	JMP WAIT_RELEASE
+	JMP WAIT_RELEASE2
 
 NEXT1:
 	IN PORTC
 	ANI 10H
 	JZ NEXT2
 	MVI B, 05H
-	JMP WAIT_RELEASE
+	JMP WAIT_RELEASE2
 
 NEXT2:
 	IN PORTC
 	ANI 10H
 	JZ NEXT3
 	MVI B, 04H
-	JMP WAIT_RELEASE
+	JMP WAIT_RELEASE2
 NEXT3:
 	IN PORTC
 	ANI 10H
 	JZ NEXT4
 	MVI B, 03H
-	JMP jump
+	JMP WAIT_RELEASE2
 
 NEXT4:
 	IN PORTC
 	ANI 10H
 	JZ NEXT5
 	MVI B, 02H
-	JMP WAIT_RELEASE
+	JMP WAIT_RELEASE2
 
 NEXT5:
 	IN PORTC
 	ANI 10H
 	JZ CHECKKYP
 	MVI B, 01H
-	JMP WAIT_RELEASE
+	JMP WAIT_RELEASE2
 
 	JZ CHECKKYP
 
@@ -68,30 +68,51 @@ LOOK:
 	RET
 
 jump:
-WAIT_TRIGGER:
+WAIT_TRIGGER1:
 	IN PORTC
 	ANI 01H         ; Use bit 0 as trigger
-	JZ WAIT_TRIGGER ; Wait until trigger pulled
+	JZ WAIT_TRIGGER1 ; Wait until trigger pulled
 
 	INR D           ; next chamber
 	MOV A, D
 	CMP B           ; bullet in this chamber?
-	JZ DEAD
+	JZ DEAD1
 
 	MVI A, 01H
 	OUT PORTA       ; survived shot
 
-WAIT_RELEASE:
+WAIT_RELEASE1:
 	IN PORTC
 	ANI 01H
-	JNZ WAIT_RELEASE ; Wait until button released (debounce)
+	JNZ WAIT_RELEASE1 ; Wait until button released (debounce)
 
-	JMP WAIT_TRIGGER  ; Wait for next trigger pull
+	JMP WAIT_TRIGGER2  ; Wait for next trigger pull
+
+WAIT_TRIGGER2:
+	IN PORTC
+	ANI 01H         ; Use bit 0 as trigger
+	JZ WAIT_TRIGGER2 ; Wait until trigger pulled
+
+	INR D           ; next chamber
+	MOV A, D
+	CMP B           ; bullet in this chamber?
+	JZ DEAD2
+
+	MVI A, 01H
+	OUT PORTA       ; survived shot
+
+WAIT_RELEASE2:
+	IN PORTC
+	ANI 01H
+	JNZ WAIT_RELEASE2 ; Wait until button released (debounce)
+
+	JMP WAIT_TRIGGER1  ; Wait for next trigger pull
 
 ; ======= DEAD BRANCH =======
-DEAD:
+DEAD1:
 	HLT
-
+DEAD2:
+	HLT
 	;org 2000H
 TABLE: DFB 06H,5BH,4FH,77H,66H,6DH,7DH,7CH,07H,7FH,6FH,39H,62H,3FH,76H,5EH
 
