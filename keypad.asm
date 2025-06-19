@@ -1,3 +1,6 @@
+; B is our Chamber that is loaded
+; C is a loop for every turn that is decremented
+
 PORTA: EQU 80H
 PORTB: EQU 81H
 PORTC: EQU 82H
@@ -6,28 +9,61 @@ ORG 0000H
 LXI SP,3FFFH
 MVI A,10011001B
 OUT CTRLP
+MVI B,00H
 MVI A,00H
+mvi C,06H
 
-CHECKKYP: 
-	IN PORTC ;Make sure keypad are in portc 
+
+
+
+CHECKKYP: ; KEYPAD PORTC
+	IN PORTC ; 1
+	MVI B,01H
 	ANI 10H
-	JZ CHECKKYP
+	JNZ WAIT_TRIGGER
+
 	IN PORTC
-	ANI 0FH
-	CALL LOOK
-	OUT PORTB
-	JMP CHECKKYP
+	MVI B,02H ; 2
+	ANI 10H
+	JNZ WAIT_TRIGGER
+
+	IN PORTC
+	MVI B,03H ; 3
+	ANI 10H
+	JNZ WAIT_TRIGGER
+
+	IN PORTC
+	MVI B,04H ; 4
+	ANI 10H
+	JNZ WAIT_TRIGGER
+	
+
+	IN PORTC
+	MVI B,05H ; 5 
+	ANI 10H
+	JNZ WAIT_TRIGGER
+	
+	IN PORTC
+	MVI B,06H ; 6
+	ANI 10H
+	JNZ WAIT_TRIGGER
+	
+	JZ CHECKKYP ; loop
+
+WAIT_TRIGGER:	; Press any button again
+		IN PORTC
+		ANI 10H
+		JZ WAIT_TRIGGER
+		JMP OPERATION
+
+OPERATION: 
+	MOV A,B
+	CMP C
+	JZ LOSE; If the value are the same, bro loses. 
+	DCR C
+	JMP WAIT_TRIGGER
+	
+LOSE: 
 	HLT
 
 
-LOOK: 
-	LXI H,TABLE
-	MOV L,A
-	MOV A,M ;Make sure 7-segment display are in portb
-	RET
-
-	org 2000H
-TABLE: DFB 06H,5BH,4FH,77H,66H,6DH,7DH,7CH,07H,7FH,6FH,39H,62H,3FH,76H,5EH
-	
-	
-	
